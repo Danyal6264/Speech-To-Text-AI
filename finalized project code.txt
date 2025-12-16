@@ -1,0 +1,48 @@
+!pip install torch==2.9.0 torchvision==0.24.0 torchaudio==2.9.0
+
+
+import gradio as gr
+import torch
+from transformers import pipeline
+
+device = "cuda" if torch.cuda.is_available() else "cpu"
+
+stt_pipeline = pipeline(
+    "automatic-speech-recognition",
+    model="openai/whisper-small",
+    device=0 if device == "cuda" else -1
+)
+
+
+
+def speech_to_text(audio):
+    result = stt_pipeline(audio)
+    return result["text"]
+
+
+
+
+interface = gr.Interface(
+    fn=speech_to_text,
+    inputs=gr.Audio(
+        sources=["microphone"],
+        type="filepath",
+        label="Speak"
+    ),
+    outputs=gr.Textbox(label="Transcribed Text"),
+    title="Multilingual Speech to Text AI",
+    description="Supports English, Urdu, and 90+ languages"
+)
+
+
+
+def speech_to_text(audio, language):
+    result = stt_pipeline(
+        audio,
+        generate_kwargs={"language": language}
+    )
+    return result["text"]
+
+
+
+model="openai/whisper-medium"
